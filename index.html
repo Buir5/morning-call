@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>知乎 Morning Call</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0b0e14;color:#e6ecff;font:15px/1.6 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
+ min-height:100vh;display:grid;place-items:center;padding:28px 16px}
+.card{width:min(720px,100%);background:linear-gradient(160deg,#131a26,#0e131c);border:1px solid #1e2a3d;
+ border-radius:20px;padding:30px 28px 24px;box-shadow:0 24px 60px rgba(0,0,0,.55)}
+.top{display:flex;gap:18px;align-items:center}
+.cover{width:104px;height:104px;border-radius:16px;object-fit:cover;background:#1a2233;flex:0 0 auto}
+.meta{min-width:0}
+.kicker{font-size:12px;letter-spacing:.18em;color:#5f7ba6}
+.kicker{color:#5f7ba6}
+h1{font-size:19px;font-weight:700;margin:6px 0 4px;line-height:1.35;word-break:break-word}
+.sub{font-size:12.5px;color:#7f8fae}
+.play{display:flex;align-items:center;gap:14px;margin:22px 0 6px}
+button.big{width:76px;height:76px;border-radius:50%;border:0;cursor:pointer;font-size:26px;color:#0a1018;
+ background:linear-gradient(135deg,#8ad4ff,#5b8cff);box-shadow:0 12px 28px rgba(70,140,255,.35);transition:.18s}
+button.big:hover{transform:translateY(-2px)}
+button.big:disabled{filter:grayscale(1);opacity:.5;cursor:not-allowed;transform:none}
+.bar{flex:1;height:8px;border-radius:99px;background:#1b2434;overflow:hidden}
+.bar > i{display:block;height:100%;width:0;background:linear-gradient(90deg,#6ee7ff,#7c8cff);transition:width .2s}
+.time{font-variant-numeric:tabular-nums;font-size:12px;color:#7f8fae;min-width:92px;text-align:right}
+.status{margin:10px 0 0;font-size:12.5px;color:#8fa0bf;min-height:20px}
+.status.warn{color:#ffbe5c}
+.status.err{color:#ff7d7d}
+.hots{margin-top:20px;border-top:1px solid #1b2434;padding-top:14px}
+.hots h2{font-size:12px;letter-spacing:.16em;color:#5f7ba6;font-weight:600;margin-bottom:10px}
+.hots ol{list-style:none;display:grid;gap:7px;counter-reset:h}
+.hots li{counter-increment:h;font-size:13.5px;color:#c7d4ea;display:flex;gap:10px}
+.hots li::before{content:counter(h);color:#4d5f7d;min-width:16px;font-variant-numeric:tabular-nums}
+.hots a{color:#c7d4ea;text-decoration:none}
+.hots a:hover{color:#8ad4ff}
+.fallback{margin-top:18px;border-top:1px solid #1b2434;padding-top:14px;display:none}
+.fallback.show{display:block}
+.fallback label{font-size:12px;color:#5f7ba6;letter-spacing:.1em}
+.fallback .row{display:flex;gap:8px;margin-top:8px}
+input[type=url]{flex:1;background:#0d1420;border:1px solid #22304a;color:#dbe6ff;border-radius:10px;padding:9px 11px;font-size:13px}
+input[type=url]:focus{outline:0;border-color:#3f6bd8}
+.so{background:#22304a;border:0;color:#cfe0ff;border-radius:10px;padding:0 14px;cursor:pointer;font-size:13px}
+.foot{margin-top:16px;font-size:11.5px;color:#4d5f7d;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="top">
+    <img id="cover" class="cover" alt="">
+    <div class="meta">
+      <div class="kicker">ZHIHU · MORNING CALL</div>
+      <h1 id="title">正在获取今日内容…</h1>
+      <div class="sub" id="sub">—</div>
+    </div>
+  </div>
+
+  <div class="play">
+    <button class="big" id="pp" disabled>▶</button>
+    <div class="bar"><i id="prog"></i></div>
+    <div class="time" id="time">00:00 / 00:00</div>
+  </div>
+  <div class="status" id="status">正在读取接口…</div>
+
+  <div class="hots">
+    <h2>今日 10 条热点</h2>
+    <ol id="hots"></ol>
+  </div>
+
+  <div class="fallback show" id="fb">
+    <label>音频直链（.m3u8 / .mp3，从知乎 App 抓到的真实地址粘这里）</label>
+    <div class="row">
+      <input type="url" id="u" placeholder="https://.../xxx.m3u8">
+      <button class="so" id="load">播放</button>
+    </div>
+  </div>
+
+  <div class="fallback show" id="ckbox">
+    <label>登录态（可选）：知乎网页版 F12 → Application → Cookies → 复制 z_c0 的值</label>
+    <div class="row">
+      <input type="text" id="ck" placeholder="z_c0=...">
+      <button class="so" id="saveck">保存并重试</button>
+    </div>
+  </div>
+  <div class="foot">
+    <span>本地播放器 · 127.0.0.1:8787</span>
+    <span id="stamp"></span>
+  </div>
+</div>
+<script>window.onerror=function(m,s,l,c){var e=document.getElementById('status');if(e){e.className='status err';e.textContent='脚本错误：'+m+' @'+l+':'+c}};</script>
+<script src="/vendor/hls.min.js"></script>
+<script>
+(function(){
+'use strict';
+function el(id){return document.getElementById(id)}
+var BUILD='2026-11-04T20:44';
+var audio=document.createElement('audio');
+audio.id='au';audio.preload='auto';audio.style.display='none';
+document.body.appendChild(audio);
+var hls=null,tries=0,timer=null,curUrl='',started=0;
+document.addEventListener('pointerdown',unmuteOnce,true);
+document.addEventListener('keydown',unmuteOnce,true);
+document.addEventListener('touchstart',unmuteOnce,true);
+function st(t,k){var e=el('status');if(!e)return;e.textContent=t;e.className='status'+(k?(' '+k):'')}
+function fmt(s){s=Math.max(0,Math.floor(s||0));var m=Math.floor(s/60),r=s%60;return (m<10?'0':'')+m+':'+(r<10?'0':'')+r}
+function gj(u){return fetch(u,{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json()})}
+function attach(u){
+  curUrl=u;
+  var box=el('fb');if(box)box.classList.add('show');
+  var inp=el('u');if(inp)inp.value=u;
+  var src=(u.indexOf(".m3u8")>=0)?("/hls?u="+encodeURIComponent(u)):u;
+  if(hls){try{hls.destroy()}catch(e){};hls=null}
+  if(window.Hls&&window.Hls.isSupported()){
+    hls=new window.Hls({maxBufferLength:30,lowLatencyMode:false});
+    hls.loadSource(src);hls.attachMedia(audio);
+    hls.on(window.Hls.Events.ERROR,function(_,d){if(d&&d.fatal)st('HLS 错误：'+d.details,'err')});
+  }else{audio.src=src}
+  st('已填入地址：'+u);
+}
+function unmuteOnce(){try{audio.muted=false;audio.volume=1;audio.playsInline=true}catch(e){}if(audio.paused&&started)audio.play().catch(function(){});var b=el('sndBtn');if(b)b.style.display='none';st('已开声 · 音量 100%')}
+function play(){
+  audio.volume=1;
+  var p=audio.play();
+  if(!p||!p.then)return;
+  p.then(function(){st('正在播放')}).catch(function(){
+    audio.muted=true;
+    var q=audio.play();
+    if(!q||!q.then)return;
+    q.then(function(){
+      st('已静音自动播放 · 点页面任意处即开声','warn');
+      document.addEventListener('pointerdown',unmuteOnce);
+      document.addEventListener('keydown',unmuteOnce);
+    }).catch(function(){st('浏览器禁止自动播放 · 点一下大按钮','warn')});
+  });
+}function $mute(){var e=el('muteBtn');if(e)e.style.display='inline-block'}
+function render(d){
+  if(el('title'))el('title').textContent=d.title||'Morning Call';
+  if(el('sub'))el('sub').textContent=(d.duration?fmt(d.duration)+' · ':'')+(d.upload_time||d.publish_time||'');
+  if(el('cover')&&d.cover_image)el('cover').src=d.cover_image;
+  if(el('hots')&&d.description&&d.description.hot_list){
+    el('hots').innerHTML=d.description.hot_list.map(function(h,i){
+      return '<li><a target=_blank href="https://www.zhihu.com/question/'+(h.question_id||'')+'">'+(h.title||'')+'</a></li>'
+    }).join('');
+  }
+}
+function load(){
+  st('正在读取接口…');
+  return gj('/api/ep').then(function(j){
+    if(!j||!j.data)throw new Error('接口返回无 data');
+    render(j.data);
+    var pu=j.data.play_url&&(j.data.play_url.primary||(j.data.play_url.backups||[])[0]);
+    if(pu&&el('u'))el('u').value=pu;
+    return gj('/api/media').catch(function(){return {}});
+  }).then(function(m){
+    if(m&&m.url){
+      tries=0;
+      if(timer){clearInterval(timer);timer=null}
+      attach(m.url);
+      setTimeout(play,200);
+      return;
+    }
+    tries++;
+    st('今日节目还没发布（第 '+tries+' 次探测），60 秒后自动重试','warn');
+    if(!timer)timer=setInterval(function(){if(tries<30)load()},60000);
+  }).catch(function(e){
+    st('读取失败：'+e.message,'err');
+    var box=el('fb');if(box)box.classList.add('show');
+  });
+}
+function tick(){
+  if(!audio.duration){return}
+  var pct=Math.min(100,(audio.currentTime/audio.duration)*100);
+  if(el('prog'))el('prog').style.width=pct+'%';
+  if(el('time'))el('time').textContent=fmt(audio.currentTime)+' / '+fmt(audio.duration);
+}
+audio.addEventListener('timeupdate',tick);
+audio.addEventListener('loadedmetadata',tick);
+audio.addEventListener('ended',function(){st('播放结束');if(el('prog'))el('prog').style.width='0%'});
+if(el('pp'))el('pp').addEventListener('click',function(){if(audio.paused)play();else audio.pause()});
+if(el('load'))el('load').addEventListener('click',function(){var u=(el('u').value||'').trim();if(!u)return;attach(u);play()});
+if(el('muteBtn'))el('muteBtn').addEventListener('click',function(){audio.muted=false;this.style.display='none';st('已开声')});
+if(el('saveck'))el('saveck').addEventListener('click',function(){
+  var v=(el('ck').value||'').trim();
+  fetch('/api/cookie?v='+encodeURIComponent(v)).then(function(){st('登录态已保存，重新抓取…');load()});
+});
+var stmp=el('stamp');if(stmp){stmp.textContent=stmp.textContent+'  '+BUILD}
+var sb=document.createElement('div');sb.id='sndBtn';sb.textContent='🔊 点击开声';sb.style.cssText='position:fixed;right:18px;bottom:18px;padding:10px 16px;border-radius:999px;background:#ffcf5c;color:#1a1a1a;font:700 14px/1 system-ui;cursor:pointer;z-index:99;box-shadow:0 6px 18px rgba(0,0,0,.35)';sb.onclick=unmuteOnce;document.body.appendChild(sb);
+window.__mc={build:BUILD,load:load,state:function(){return{url:curUrl,tries:tries}}};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',load);else load();
+})();
+</script>
+</body>
+</html>

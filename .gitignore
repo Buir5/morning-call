@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+cookie.txt
+media_cache.json
+_diag*.py
+_patch*.py
+*.log
