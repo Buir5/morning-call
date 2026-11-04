@@ -8,8 +8,6 @@
 收徒 · 我靠这套路子吃饭，你也可以**
 >
 > 从「发现一个痛点」→「写个几百行的小工具」→「挂上资源位」→「有人付钱」，全流程我在这篇里讲透了。
-> 想学这门手艺的，点这里：**[👉 收徒说明（知乎）](https://zhuanlan.zhihu.com/p/54351262)**
-
 # 知乎 Morning Call · 本地播放器
 
 **一个按钮，点开就播。** 不用装 App，不用翻知乎的播客页，不用每天早上找那个藏在二级菜单里的音频。
@@ -112,8 +110,6 @@ MIT
 
 <a id=english></a>
 
----
-
 # Morning Call Player
 
 > Zhihu's daily podcast, in a local page with one big button. Click, it plays. Zero dependencies.
@@ -182,7 +178,6 @@ Stop it by closing the console window. Set `MORNING_NO_BROWSER=1` to skip auto-o
  收徒 · 我靠这套路子吃饭，你也可以**
 >
 > 从「发现一个痛点」→「写个几百行的小工具」→「挂上资源位」→「有人付钱」，全流程我在这篇里讲透了。
-> 想学这门手艺的，点这里：**[👉 收徒说明（知乎）](https://zhuanlan.zhihu.com/p/54351262)**
 
 > **🧭 收徒 · 我靠这套路子吃饭，你也可以**
 >
