@@ -1,5 +1,7 @@
 # 知乎 Morning Call 本地播放器
 
+> 作者：[知乎老哥](https://www.zhihu.com/people/svip3) — 点击在新窗口打开
+
 把「知乎 Morning Call」做成一个**本机网页**：一个大按钮，点开就播当天节目，顺带列出当天 10 条热点。
 
 ## 为什么需要它
