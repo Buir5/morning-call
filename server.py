@@ -207,9 +207,20 @@ class S(socketserver.ThreadingTCPServer):
 
 if __name__ == '__main__':
     os.chdir(DIR)
-    srv = S(('127.0.0.1', PORT), H)
+    try:
+        srv = S(('127.0.0.1', PORT), H)
+    except OSError as e:
+        print('port %d is busy: %s' % (PORT, e))
+        print('maybe another copy is already running: http://127.0.0.1:%d/' % PORT)
+        raise SystemExit(1)
     print('MORNING CALL  http://127.0.0.1:%d/' % PORT)
-    print('按 Ctrl+C 停止')
+    print('close this window or press Ctrl+C to stop')
+    if os.environ.get('MORNING_NO_BROWSER', '') != '1':
+        try:
+            import threading, webbrowser
+            threading.Timer(1.2, lambda: webbrowser.open('http://127.0.0.1:%d/' % PORT)).start()
+        except Exception:
+            pass
     try:
         srv.serve_forever()
     except KeyboardInterrupt:
