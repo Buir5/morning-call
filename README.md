@@ -105,6 +105,8 @@ hls.js 直接 `loadSource('https://api.zhihu.com/...')` 会抛 `manifestLoadErro
 
 MIT
 
+<a id=english></a>
+
 # Morning Call Player
 
 > Zhihu's daily podcast, in a local page with one big button. Click, it plays. Zero dependencies.
@@ -169,8 +171,6 @@ Stop it by closing the console window. Set `MORNING_NO_BROWSER=1` to skip auto-o
 ## Author
 
 [知乎老哥](https://www.zhihu.com/people/svip3) — MIT licensed.
-
-<a id=english></a>
 
 > **🧭 收徒 · 我靠这套路子吃饭，你也可以**
 >
